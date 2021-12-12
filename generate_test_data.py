@@ -28,19 +28,12 @@ from sklearn import metrics
 import common as com
 import keras_model
 ########################################################################
-
-
-
-
-########################################################################
 # main 01_test.py
 ########################################################################
 if __name__ == "__main__":
 
     args = com.command_line_chk()
-    if args.config is None:
-        print("No config was set!")
-        sys.exit(-1)
+    
     # load parameter.yaml
     param = com.yaml_load(args.config)
 
@@ -53,6 +46,9 @@ if __name__ == "__main__":
     # initialize lines in csv for AUC and pAUC
     csv_lines = []
 
+    test_data_save_load_directory = "./test_data/downsampled_128_5_to_32_4_skip_method.npy"
+    test_data_ground_truths_save_load_directory = "./test_data/downsampled_128_5_to_32_4_ground_truths_skip_method.npy"
+
     # loop of the base directory
     for idx, target_dir in enumerate(dirs):
         print("\n===========================")
@@ -64,27 +60,11 @@ if __name__ == "__main__":
         model_file = "{model}/model_{machine_type}.h5".format(model=param["model_directory"],
                                                                 machine_type=machine_type)
 
-        #check if testing already conducted
-        model_result_file = "{result_dir}/result.csv".format(result_dir=param['result_directory'])
-        if os.path.exists(model_result_file):
-            if not os.stat(model_result_file).st_size == 0:
-                continue
-
-        # load model file
-        if not os.path.exists(model_file):
-            com.logger.error("{} model not found ".format(machine_type))
-            sys.exit(-1)
-        model = keras_model.load_model(model_file)
-        model.summary()
-
-        # results by type
-        csv_lines.append([machine_type])
-        csv_lines.append(["id", "AUC", "pAUC"])
-        performance = []
-
         machine_id_list = com.get_machine_id_list_for_test(target_dir)
-
+        test_data = []
+        test_data_ground_truths = []
         for id_str in machine_id_list:
+            machine_test_data = []
             # load test file
             test_files, y_true = com.test_file_list_generator(target_dir, id_str)
 
@@ -105,37 +85,17 @@ if __name__ == "__main__":
                                                     n_fft=param["feature"]["n_fft"],
                                                     hop_length=param["feature"]["hop_length"],
                                                     power=param["feature"]["power"])
-                    predictions = model.predict(data)
-                    errors = numpy.mean(numpy.square(data - predictions), axis=1)
-                    y_pred[file_idx] = numpy.mean(errors)
-                    anomaly_score_list.append([os.path.basename(file_path), y_pred[file_idx]])
                 except:
                     com.logger.error("file broken!!: {}".format(file_path))
-            
-
-            # save anomaly score
-            com.save_csv(save_file_path=anomaly_score_csv, save_data=anomaly_score_list)
-            com.logger.info("anomaly score result ->  {}".format(anomaly_score_csv))
-
-            # append AUC and pAUC to lists
-            auc = metrics.roc_auc_score(y_true, y_pred)
-            p_auc = metrics.roc_auc_score(y_true, y_pred, max_fpr=param["max_fpr"])
-            csv_lines.append([id_str.split("_", 1)[1], auc, p_auc])
-            performance.append([auc, p_auc])
-            com.logger.info("AUC : {}".format(auc))
-            com.logger.info("pAUC : {}".format(p_auc))
+                machine_test_data.append(data)
+            test_data.append(machine_test_data)
+            test_data_ground_truths.append(y_true)
 
 
+            print("Shape of test_data is {}, shape of test_data_ground_truths is {}".format(numpy.shape(test_data), numpy.shape(test_data_ground_truths)))
             print("\n============ END OF TEST FOR A MACHINE ID ============")
-
-        # calculate averages for AUCs and pAUCs
-        averaged_performance = numpy.mean(numpy.array(performance, dtype=float), axis=0)
-        csv_lines.append(["Average"] + list(averaged_performance))
-        csv_lines.append([])
-
-
-    if csv_lines:
-        # output results
-        result_path = "{result}/{file_name}".format(result=param["result_directory"], file_name=param["result_file"])
-        com.logger.info("AUC and pAUC results -> {}".format(result_path))
-        com.save_csv(save_file_path=result_path, save_data=csv_lines)
+        if not os.path.exists('./test_data'):
+            os.makedirs('./test_data')
+        numpy.save(test_data_save_load_directory,test_data)
+        numpy.save(test_data_ground_truths_save_load_directory, test_data_ground_truths)
+        print("Saved test data to {}".format(test_data_save_load_directory))

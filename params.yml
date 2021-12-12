@@ -1,17 +1,11 @@
 ---
 dev_directory: "./dev_data"
-feature:
-  frames: 5
-  hop_length: 512
-  n_fft: 1024
-  n_mels: 128
-  power: 2
 fit:
   batch_size: 128
   compile:
     loss: mean_squared_error
     optimizer: adam
-  epochs: 100
+  epochs: 50
   shuffle: true
   validation_split: 0.1
   verbose: 1
