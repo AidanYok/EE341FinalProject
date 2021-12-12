@@ -141,123 +141,121 @@ def file_list_generator(target_dir,
 
 ########################################################################
 # main 00_train.py
-########################################################################
-if __name__ == "__main__":                                        
-                                        
-	def train(n_Mels = 64, Frames = 5, n_FFT = 1024, hop_Length = 512, Power = 2.0):
-	  # check mode
-	  # "development": mode == True
-	  # "evaluation": mode == False
+########################################################################                                        
+def train(n_Mels = 64, Frames = 5, n_FFT = 1024, hop_Length = 512, Power = 2.0):
+  # check mode
+  # "development": mode == True
+  # "evaluation": mode == False
 
-	  # load parameter.yaml 
-	  param = com.yaml_load('params.yml')
-		  
-	  # make output directory
-	  os.makedirs(param["model_directory"], exist_ok=True)
+  # load parameter.yaml 
+  param = com.yaml_load('params.yml')
 
-	  # initialize the visualizer
-	  visualizer = visualizer()
+  # make output directory
+  os.makedirs(param["model_directory"], exist_ok=True)
 
-	  # load base_directory list
-	  dirs = com.select_dirs(param=param)
+  # initialize the visualizer
+  visualizer = visualizer()
 
-	  # loop of the base directory
-	  for idx, target_dir in enumerate(dirs):
-		  print("\n===========================")
-		  print("[{idx}/{total}] {dirname}".format(dirname=target_dir, idx=idx+1, total=len(dirs)))
+  # load base_directory list
+  dirs = com.select_dirs(param=param)
 
-		  # set path
-		  machine_type = os.path.split(target_dir)[1]
-		  model_file_path = "{model}/model_{machine_type}.h5".format(model=param["model_directory"],
-																		machine_type=machine_type)
-		  history_img = "{model}/history_{machine_type}.png".format(model=param["model_directory"],
+  # loop of the base directory
+  for idx, target_dir in enumerate(dirs):
+	  print("\n===========================")
+	  print("[{idx}/{total}] {dirname}".format(dirname=target_dir, idx=idx+1, total=len(dirs)))
+
+	  # set path
+	  machine_type = os.path.split(target_dir)[1]
+	  model_file_path = "{model}/model_{machine_type}.h5".format(model=param["model_directory"],
 																	machine_type=machine_type)
+	  history_img = "{model}/history_{machine_type}.png".format(model=param["model_directory"],
+																machine_type=machine_type)
 
-		  if os.path.exists(history_img):
-			  com.logger.info("model already exists and trained")
-			  continue
+	  if os.path.exists(history_img):
+		  com.logger.info("model already exists and trained")
+		  continue
 
-		  
-		  # generate dataset
-		  
-		  train_data_save_load_directory = "./train_time_data/downsampled_128_5_to_32_4_skip_method.npy"
-		  # if train_data available, load post processed data in local directory without reprocessing wav files --saves time--
-		  if os.path.exists(train_data_save_load_directory):
-			  print("Loading train_data from {}".format(train_data_save_load_directory))
-			  
-			  train_data = numpy.load(train_data_save_load_directory, allow_pickle=True)
-		  else:
-			  print("============== DATASET_GENERATOR ==============")
-			  files = file_list_generator(target_dir)
-			  train_data = list_to_vector_array(files,
-												msg="generate train_dataset",
-												n_mels=n_Mels,
-												frames=Frames,
-												n_fft=n_FFT,
-												hop_length=hop_Length,
-												power=Power)
-			  #save train_data
-			  if not os.path.exists('./train_time_data'):
-				  os.makedirs('./train_time_data')
-			  numpy.save(train_data_save_load_directory, train_data)
-			  print("Train data saved to {}".format(train_data_save_load_directory))
 
-		  # train model
-		  print("============== MODEL TRAINING ==============")
-		  if param["model"]["name"] == 'qmodel':
-			  model = qmodel.get_model()
-		  else:
-			  model = keras_model.get_model(param["model"]["name"], 
-										  4*32,
-										  hiddenDim=param["model"]["hidden_dim"], 
-										  encodeDim=param["model"]["encode_dim"], 
-										  halfcode_layers=param["model"]["halfcode_layers"],
-										  fan_in_out=param["model"]["fan_in_out"],
-										  batchNorm=param["model"]["batch_norm"],
-										  l1reg=param["model"]["l1reg"],
-										  bits=param["model"]["quantization"]["bits"],
-										  intBits=param["model"]["quantization"]["int_bits"],
-										  reluBits=param["model"]["quantization"]["relu_bits"],
-										  reluIntBits=param["model"]["quantization"]["relu_int_bits"],
-										  lastBits=param["model"]["quantization"]["last_bits"],
-										  lastIntBits=param["model"]["quantization"]["last_int_bits"])
-		  param["model"]["name"]
-		  model.summary()
+	  # generate dataset
 
-		  
-		  from tensorflow.keras.callbacks import EarlyStopping,History,ModelCheckpoint,ReduceLROnPlateau, TensorBoard
-		  
-		  modelbestcheck = ModelCheckpoint(model_file_path,
-											monitor='val_loss', 
-											verbose=1,
-											save_best_only=True)
-		  stopping = EarlyStopping(monitor='val_loss',
-									patience = 10 if param["pruning"]["constant"] == True else 10 if param["pruning"]["decay"] == True else 15, verbose=1, mode='min')
-		  
-		  reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=1,
-										mode='min', verbose=1, epsilon=0.001,
-										cooldown=4, min_lr=1e-5)
+	  train_data_save_load_directory = "./train_time_data/downsampled_128_5_to_32_4_skip_method.npy"
+	  # if train_data available, load post processed data in local directory without reprocessing wav files --saves time--
+	  if os.path.exists(train_data_save_load_directory):
+		  print("Loading train_data from {}".format(train_data_save_load_directory))
 
-		  callbacks=[
-			  modelbestcheck,
-			  stopping,
-			  reduce_lr,
-		  ]
-		  
-		  model.compile(**param["fit"]["compile"])
+		  train_data = numpy.load(train_data_save_load_directory, allow_pickle=True)
+	  else:
+		  print("============== DATASET_GENERATOR ==============")
+		  files = file_list_generator(target_dir)
+		  train_data = list_to_vector_array(files,
+											msg="generate train_dataset",
+											n_mels=n_Mels,
+											frames=Frames,
+											n_fft=n_FFT,
+											hop_length=hop_Length,
+											power=Power)
+		  #save train_data
+		  if not os.path.exists('./train_time_data'):
+			  os.makedirs('./train_time_data')
+		  numpy.save(train_data_save_load_directory, train_data)
+		  print("Train data saved to {}".format(train_data_save_load_directory))
 
-		  print("Shape of training data element is: {}".format(numpy.shape(train_data[0])))
-		  history = model.fit(train_data,
-							  train_data,
-							  epochs=param["fit"]["epochs"],
-							  batch_size=param["fit"]["batch_size"],
-							  shuffle=param["fit"]["shuffle"],
-							  validation_split=param["fit"]["validation_split"],
-							  verbose=param["fit"]["verbose"],
-							  callbacks=callbacks)
-			  
-		  visualizer.loss_plot(history.history["loss"], history.history["val_loss"])
-		  visualizer.save_figure(history_img)
-		  model.save(model_file_path)
-		  com.logger.info("save_model -> {}".format(model_file_path))
-		  print("============== END TRAINING ==============")
+	  # train model
+	  print("============== MODEL TRAINING ==============")
+	  if param["model"]["name"] == 'qmodel':
+		  model = qmodel.get_model()
+	  else:
+		  model = keras_model.get_model(param["model"]["name"], 
+									  4*32,
+									  hiddenDim=param["model"]["hidden_dim"], 
+									  encodeDim=param["model"]["encode_dim"], 
+									  halfcode_layers=param["model"]["halfcode_layers"],
+									  fan_in_out=param["model"]["fan_in_out"],
+									  batchNorm=param["model"]["batch_norm"],
+									  l1reg=param["model"]["l1reg"],
+									  bits=param["model"]["quantization"]["bits"],
+									  intBits=param["model"]["quantization"]["int_bits"],
+									  reluBits=param["model"]["quantization"]["relu_bits"],
+									  reluIntBits=param["model"]["quantization"]["relu_int_bits"],
+									  lastBits=param["model"]["quantization"]["last_bits"],
+									  lastIntBits=param["model"]["quantization"]["last_int_bits"])
+	  param["model"]["name"]
+	  model.summary()
+
+
+	  from tensorflow.keras.callbacks import EarlyStopping,History,ModelCheckpoint,ReduceLROnPlateau, TensorBoard
+
+	  modelbestcheck = ModelCheckpoint(model_file_path,
+										monitor='val_loss', 
+										verbose=1,
+										save_best_only=True)
+	  stopping = EarlyStopping(monitor='val_loss',
+								patience = 10 if param["pruning"]["constant"] == True else 10 if param["pruning"]["decay"] == True else 15, verbose=1, mode='min')
+
+	  reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=1,
+									mode='min', verbose=1, epsilon=0.001,
+									cooldown=4, min_lr=1e-5)
+
+	  callbacks=[
+		  modelbestcheck,
+		  stopping,
+		  reduce_lr,
+	  ]
+
+	  model.compile(**param["fit"]["compile"])
+
+	  print("Shape of training data element is: {}".format(numpy.shape(train_data[0])))
+	  history = model.fit(train_data,
+						  train_data,
+						  epochs=param["fit"]["epochs"],
+						  batch_size=param["fit"]["batch_size"],
+						  shuffle=param["fit"]["shuffle"],
+						  validation_split=param["fit"]["validation_split"],
+						  verbose=param["fit"]["verbose"],
+						  callbacks=callbacks)
+
+	  visualizer.loss_plot(history.history["loss"], history.history["val_loss"])
+	  visualizer.save_figure(history_img)
+	  model.save(model_file_path)
+	  com.logger.info("save_model -> {}".format(model_file_path))
+	  print("============== END TRAINING ==============")
