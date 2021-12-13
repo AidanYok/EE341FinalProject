@@ -153,9 +153,6 @@ def train(n_Mels = 64, Frames = 5, n_FFT = 1024, hop_Length = 512, Power = 2.0):
   # make output directory
   os.makedirs(param["model_directory"], exist_ok=True)
 
-  # initialize the visualizer
-  visualizer = visualizer()
-
   # load base_directory list
   dirs = com.select_dirs(param=param)
 
