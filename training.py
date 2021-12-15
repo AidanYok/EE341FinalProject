@@ -27,50 +27,6 @@ from tqdm import tqdm
 # original lib
 import common as com
 import keras_model
-########################################################################
-# visualizer
-########################################################################
-class visualizer(object):
-    def __init__(self):
-        import matplotlib.pyplot as plt
-        self.plt = plt
-        self.fig = self.plt.figure(figsize=(30, 10))
-        self.plt.subplots_adjust(wspace=0.3, hspace=0.3)
-
-    def loss_plot(self, loss, val_loss):
-        """
-        Plot loss curve.
-
-        loss : list [ float ]
-            training loss time series.
-        val_loss : list [ float ]
-            validation loss time series.
-
-        return   : None
-        """
-        ax = self.fig.add_subplot(1, 1, 1)
-        ax.cla()
-        ax.plot(loss)
-        ax.plot(val_loss)
-        ax.set_title("Model loss")
-        ax.set_xlabel("Epoch")
-        ax.set_ylabel("Loss")
-        ax.legend(["Train", "Validation"], loc="upper right")
-
-    def save_figure(self, name):
-        """
-        Save figure.
-
-        name : str
-            save png file path.
-
-        return : None
-        """
-        self.plt.savefig(name)
-
-
-########################################################################
-
 
 def list_to_vector_array(file_list,
                          msg="calc...",
@@ -177,25 +133,21 @@ def train(n_Mels = 64, Frames = 5, n_FFT = 1024, hop_Length = 512, Power = 2.0):
 
 	  train_data_save_load_directory = "./train_time_data/downsampled_128_5_to_32_4_skip_method.npy"
 	  # if train_data available, load post processed data in local directory without reprocessing wav files --saves time--
-	  if os.path.exists(train_data_save_load_directory):
-		  print("Loading train_data from {}".format(train_data_save_load_directory))
 
-		  train_data = numpy.load(train_data_save_load_directory, allow_pickle=True)
-	  else:
-		  print("============== DATASET_GENERATOR ==============")
-		  files = file_list_generator(target_dir)
-		  train_data = list_to_vector_array(files,
-											msg="generate train_dataset",
-											n_mels=n_Mels,
-											frames=Frames,
-											n_fft=n_FFT,
-											hop_length=hop_Length,
-											power=Power)
-		  #save train_data
-		  if not os.path.exists('./train_time_data'):
-			  os.makedirs('./train_time_data')
+	  print("============== DATASET_GENERATOR ==============")
+	  files = file_list_generator(target_dir)
+	  train_data = list_to_vector_array(files,
+										msg="generate train_dataset",
+										n_mels=n_Mels,
+										frames=Frames,
+										n_fft=n_FFT,
+										hop_length=hop_Length,
+										power=Power)
+	  #save train_data
+	  if not os.path.exists('./train_time_data'):
+		  os.makedirs('./train_time_data')
 		  numpy.save(train_data_save_load_directory, train_data)
-		  print("Train data saved to {}".format(train_data_save_load_directory))
+		  rint("Train data saved to {}".format(train_data_save_load_directory))
 
 	  # train model
 	  print("============== MODEL TRAINING ==============")
