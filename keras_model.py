@@ -24,19 +24,19 @@ def get_model(inputDim):
     """
     inputLayer = Input(shape=(inputDim,))
 
-    h = Dense(128)(inputLayer)
+    h = Dense(32)(inputLayer)
     h = BatchNormalization()(h)
     h = Activation('relu')(h)
 
-    h = Dense(64)(h)
+    h = Dense(32)(h)
     h = BatchNormalization()(h)
     h = Activation('relu')(h)
 
-    h = Dense(64)(h)
+    h = Dense(32)(h)
     h = BatchNormalization()(h)
     h = Activation('relu')(h)
 
-    h = Dense(54)(h)
+    h = Dense(32)(h)
     h = BatchNormalization()(h)
     h = Activation('relu')(h)
     
@@ -44,19 +44,19 @@ def get_model(inputDim):
     h = BatchNormalization()(h)
     h = Activation('relu')(h)
 
-    h = Dense(64)(h)
+    h = Dense(32)(h)
     h = BatchNormalization()(h)
     h = Activation('relu')(h)
 
-    h = Dense(64)(h)
+    h = Dense(32)(h)
     h = BatchNormalization()(h)
     h = Activation('relu')(h)
 
-    h = Dense(64)(h)
+    h = Dense(32)(h)
     h = BatchNormalization()(h)
     h = Activation('relu')(h)
 
-    h = Dense(64)(h)
+    h = Dense(32)(h)
     h = BatchNormalization()(h)
     h = Activation('relu')(h)
 

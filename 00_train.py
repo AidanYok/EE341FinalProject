@@ -191,7 +191,7 @@ if __name__ == "__main__":
 
         # train model
         print("============== MODEL TRAINING ==============")
-        model = keras_model.get_model(128)
+        model = keras_model.get_model(640)
         model.summary()
 
         model.compile(**param["fit"]["compile"])
