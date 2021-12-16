@@ -25,5 +25,6 @@ os.system('pip install tqdm==4.23.3')
 
 os.system('pip install h5py==2.10.0')
 
+os.system('pip install numba==0.48')
 
 
