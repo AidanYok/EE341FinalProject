@@ -23,4 +23,7 @@ os.system('pip install tensorflow==1.15.0')
 
 os.system('pip install tqdm==4.23.3')
 
+os.system('pip install h5py==2.10.0')
+
+
 
