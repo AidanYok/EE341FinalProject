@@ -104,8 +104,7 @@ def test_file_list_generator(target_dir,
     """
     com.logger.info("target_dir : {}".format(target_dir+"_"+id_name))
 
-#     # development
-#     if mode:
+
     normal_files = sorted(
         glob.glob("{dir}/{dir_name}/{prefix_normal}_{id_name}*.{ext}".format(dir=target_dir,
                                                                              dir_name=dir_name,
@@ -126,18 +125,6 @@ def test_file_list_generator(target_dir,
     if len(files) == 0:
         com.logger.exception("no_wav_file!!")
     print("\n========================================")
-
-    # evaluation
-#     else:
-#     files = sorted(
-#         glob.glob("{dir}/{dir_name}/*{id_name}*.{ext}".format(dir=target_dir,
-#                                                               dir_name=dir_name,
-#                                                               id_name=id_name,
-#                                                               ext=ext)))
-#     labels = None
-#     com.logger.info("test_file  num : {num}".format(num=len(files)))
-#     if len(files) == 0:
-#         com.logger.exception("no_wav_file!!")
     print("\n=========================================")
 
     return files, labels

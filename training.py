@@ -107,10 +107,6 @@ def file_list_generator(target_dir,
 def train(n_Mels = 128, Frames = 5, n_FFT = 1024, hop_Length = 512, Power = 2.0):
     # check mode
     mode = True
-    # "evaluation": mode == False
-#     mode = com.command_line_chk()
-#     if mode is None:
-#         sys.exit(-1)
         
     # make output directory
     os.makedirs(param["model_directory"], exist_ok=True)
