@@ -9,6 +9,7 @@
 # import python-library
 ########################################################################
 # from import
+<<<<<<< HEAD
 
 import tensorflow.keras as keras
 import tensorflow.keras.models
@@ -26,16 +27,26 @@ def get_model(name,inputDim,**kwargs):
         return get_qkeras_model(inputDim,**kwargs)
         print('ERROR')
         return None
+=======
+import keras.models
+from keras.models import Model
+from keras.layers import Input, Dense, BatchNormalization, Activation
+>>>>>>> origin/dcase
 
 ########################################################################
 # keras model
 ########################################################################
+<<<<<<< HEAD
 def get_keras_model(inputDim,hiddenDim=128,encodeDim=8, batchNorm=True, qBatchNorm=False, l1reg=0, input_batchNorm=False, halfcode_layers=4, fan_in_out=64, bits=None, intBits=None, reluBits=None, reluIntBits=None, lastBits=None, lastIntBits=None):
+=======
+def get_model(inputDim):
+>>>>>>> origin/dcase
     """
     define the keras model
     the model based on the simple dense auto encoder 
     (128*128*128*128*8*128*128*128*128)
     """
+<<<<<<< HEAD
     
     # Declare encode network
     inputLayer = Input(shape=(inputDim,))
@@ -137,5 +148,31 @@ co = {}
 _add_supported_quantized_objects(co)  
 def load_model(file_path):
     return keras.models.load_model(file_path, custom_objects=co)
+=======
+    inputLayer = Input(shape=(inputDim,))
+
+    h = Dense(32)(inputLayer)
+    h = BatchNormalization()(h)
+    h = Activation('relu')(h)
+
+    
+    h = Dense(8)(h)
+    h = BatchNormalization()(h)
+    h = Activation('relu')(h)
+
+
+    h = Dense(32)(h)
+    h = BatchNormalization()(h)
+    h = Activation('relu')(h)
+
+    h = Dense(inputDim)(h)
+
+    return Model(inputs=inputLayer, outputs=h)
+#########################################################################
+
+
+def load_model(file_path):
+    return keras.models.load_model(file_path)
+>>>>>>> origin/dcase
 
     

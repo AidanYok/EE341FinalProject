@@ -8,6 +8,7 @@
 ########################################################################
 # import default python-library
 ########################################################################
+<<<<<<< HEAD
 
 import os
 import tensorflow as tf
@@ -19,15 +20,28 @@ import sys
 import time
 ########################################################################
 import logging
+=======
+import os
+import glob
+import sys
+########################################################################
+
+
+>>>>>>> origin/dcase
 ########################################################################
 # import additional python-library
 ########################################################################
 import numpy
+<<<<<<< HEAD
+=======
+# from import
+>>>>>>> origin/dcase
 from tqdm import tqdm
 # original lib
 import common as com
 import keras_model
 ########################################################################
+<<<<<<< HEAD
 # visualizer
 ########################################################################
 class visualizer(object):
@@ -70,6 +84,16 @@ class visualizer(object):
 
 
 ########################################################################
+=======
+
+
+########################################################################
+# load parameter.yaml
+########################################################################
+param = com.yaml_load()
+########################################################################
+
+>>>>>>> origin/dcase
 
 
 def list_to_vector_array(file_list,
@@ -105,9 +129,15 @@ def list_to_vector_array(file_list,
                                                 hop_length=hop_length,
                                                 power=power)
         if idx == 0:
+<<<<<<< HEAD
             dataset = numpy.zeros((vector_array.shape[0] * len(file_list), 128), float)
         dataset[vector_array.shape[0] * idx: vector_array.shape[0] * (idx + 1), :] = vector_array
     print("Shape of dataset: {}".format(dataset.shape))
+=======
+            dataset = numpy.zeros((vector_array.shape[0] * len(file_list), dims), float)
+        dataset[vector_array.shape[0] * idx: vector_array.shape[0] * (idx + 1), :] = vector_array
+
+>>>>>>> origin/dcase
     return dataset
 
 
@@ -141,6 +171,7 @@ def file_list_generator(target_dir,
 
 ########################################################################
 # main 00_train.py
+<<<<<<< HEAD
 ########################################################################                                        
 def train(n_Mels = 64, Frames = 5, n_FFT = 1024, hop_Length = 512, Power = 2.0):
   # check mode
@@ -256,3 +287,58 @@ def train(n_Mels = 64, Frames = 5, n_FFT = 1024, hop_Length = 512, Power = 2.0):
 	  model.save(model_file_path)
 	  com.logger.info("save_model -> {}".format(model_file_path))
 	  print("============== END TRAINING ==============")
+=======
+########################################################################
+def train(n_Mels = 128, Frames = 5, n_FFT = 1024, hop_Length = 512, Power = 2.0):
+    # check mode
+    mode = True
+        
+    # make output directory
+    os.makedirs(param["model_directory"], exist_ok=True)
+
+    # load base_directory list
+    dirs = com.select_dirs(param=param, mode=mode)
+
+    # loop of the base directory
+    for idx, target_dir in enumerate(dirs):
+        print("\n===========================")
+        print("[{idx}/{total}] {dirname}".format(dirname=target_dir, idx=idx+1, total=len(dirs)))
+
+        # set path
+        machine_type = os.path.split(target_dir)[1]
+        model_file_path = "{model}/model_{machine_type}.hdf5".format(model=param["model_directory"],
+                                                                     machine_type=machine_type)
+        history_img = "{model}/history_{machine_type}.png".format(model=param["model_directory"],
+                                                                  machine_type=machine_type)
+
+
+        # generate dataset
+        print("============== DATASET_GENERATOR ==============")
+        files = file_list_generator(target_dir)
+        train_data = list_to_vector_array(files,
+                                          msg="generate train_dataset",
+                                          n_mels=n_Mels,
+                                          frames=Frames,
+                                          n_fft=n_FFT,
+                                          hop_length=hop_Length,
+                                          power=Power)
+
+        # train model
+        print("============== MODEL TRAINING ==============")
+        model = keras_model.get_model(n_Mels * Frames)
+        model.summary()
+
+        model.compile(**param["fit"]["compile"])
+
+        history = model.fit(train_data,
+                            train_data,
+                            epochs=param["fit"]["epochs"],
+                            batch_size=param["fit"]["batch_size"],
+                            shuffle=param["fit"]["shuffle"],
+                            validation_split=param["fit"]["validation_split"],
+                            verbose=param["fit"]["verbose"])
+        
+        model.save(model_file_path)
+        com.logger.info("save_model -> {}".format(model_file_path))
+        print("============== END TRAINING ==============")
+>>>>>>> origin/dcase
